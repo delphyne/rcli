@@ -1,0 +1,7 @@
+## Interface: 30300
+## Title: RCLI
+## Notes: Provides a set of quick /rcli commands which allow a raid leader to manager a raid without the need to reach for a mouse.
+## Author: delphyne
+## Version: 1.0
+
+RCLI.lua

@@ -1,0 +1,7 @@
+syntax: glob
+target
+.settings
+.project
+.classpath
+META-INF/MANIFEST.MF
+.DS_Store

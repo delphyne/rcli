@@ -1,6 +1,22 @@
 local RCLI = CreateFrame("Frame", "RCLI")
 
+local ItemQualityByName = {
+    Poor = 0,
+    Common = 1,
+    Uncommon = 2,
+    Rare = 3,
+    Epic = 4,
+    Legendary = 5,
+    Heirloom = 6
+}
+
+-- local ItemQualityByNumber = {}
+-- for k,v in pairs(ItemQualityByName) do
+--     ItemQualityByNumber[v + 1] = k
+-- end
+
 local convertOnPartyJoin = false
+local overflowInviteMembers = {}
 
 local function FindRaidIndex(player)
     for i = 1, GetNumRaidMembers() do
@@ -14,7 +30,6 @@ end
 local function Promote(args)
     local player = table.remove(args, 1)
     local role = table.remove(args,1)
-    
     if player == nil or player == "" then
         print("You must specify a player to promote.")
     else
@@ -24,6 +39,7 @@ local function Promote(args)
             PromoteToLeader(player, false)
         elseif role == "looter" then
             SetLootMethod("master", player)
+            SetLootThreshold(ItemQualityByName["Epic"])
         end
     end
 end
@@ -47,7 +63,7 @@ local function Convert()
         print("You are not in a party.")
     elseif IsPartyLeader() ~= 1 then
         print("You are not the party leader.")
-    elseif not UnitInRaid("player") then
+    elseif UnitInRaid("player") then
         print("You are already in a raid.")
     else
         ConvertToRaid()
@@ -64,10 +80,13 @@ local function Kick(args)
 end
 
 local function Invite(args)
+    local players = args
     if not UnitInRaid("player") then
         convertOnPartyJoin = true
+        local maxInvite = 5 - GetNumPartyMembers()
+        players = {unpack(args, 1, maxInvite)}
+        overflowInviteMembers = {unpack(args, maxInvite + 1)}
     end
-    
     for num, player in pairs(args) do
         InviteUnit(player)
     end
@@ -89,12 +108,8 @@ end
 local function Swap(args)
     local player1 = table.remove(args, 1)
     local player2 = table.remove(args, 1)
-    
     local raidindex1 = FindRaidIndex(player1)
-    print("player1", player1, "index1", raidindex1)
-    local raidIndex2 = FindRaidIndex(player2)
-    print("player2", player2, "index2", raidindex2)
-
+    local raidindex2 = FindRaidIndex(player2)
     if raidindex1 == nil then
         print(player1, "is not in the raid.")
     elseif raidindex2 == nil then 
@@ -110,36 +125,48 @@ local function ParseCli(msg)
     local args = {strsplit(" ", msg)}
     local cmd = table.remove(args, 1)
     if cmd == "" or cmd == "help" then
-        print("RCLI")
+        print("RCLI (by Delphyne of Eredar)")
+        print("http://code.google.com/p/rcli/")
         print("====")
+        print("i[nv[ite]] <player> [...]")
+        print("k[ick] <player> [...]")
+        print("c[onvert]")
+        print("m[ove] <player> <group>")
+        print("s[wap] <player1> <player2>")
+        print("d[emote] <player> [...]")
+        print("p[romote] <player> [leader|looter]")
     elseif cmd == "promote" then
         Promote(args)
-    elseif cmd == "invite" then
+    elseif cmd == "invite" or cmd == "inv" or cmd == "i" then
         Invite(args)
-    elseif cmd == "kick" then
+    elseif cmd == "kick" or cmd == "k" then
         Kick(args)
-    elseif cmd == "convert" then
+    elseif cmd == "convert" or cmd == "c" then
         Convert()
-    elseif cmd == "move" then
+    elseif cmd == "move" or cmd == "m" then
         Move(args)
-    elseif cmd == "swap" then
+    elseif cmd == "swap" or cmd == "s" then
         Swap(args)
-    elseif cmd == "demote" then
+    elseif cmd == "demote" or cmd == "d" then
         Demote(args)
+    end
+end
+
+local function HandlePartyJoin(self, event, ...)
+    if convertOnPartyJoin then
+        if not UnitInRaid("player") then
+            ConvertToRaid()
+        end
+        if UnitInRaid("player") then
+            convertOnPartyJoin = false
+            Invite(overflowInviteMembers)
+            wipe(overFlowInviteMembers)
+        end 
     end
 end
 
 SLASH_RCLI1 = "/rcli"
 SlashCmdList["RCLI"] = ParseCli
-
-local function HandlePartyJoin(self, event, ...)
-    if convertOnPartyJoin then
-        if not UnitInRaid("player") then
-            convertOnPartyJoin = false
-            ConvertToRaid()
-        end
-    end
-end
 
 SLASH_RELOAD1 = "/rl"
 SlashCmdList["RELOAD"] = function(msg)

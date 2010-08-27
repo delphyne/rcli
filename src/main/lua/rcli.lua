@@ -125,16 +125,16 @@ local function ParseCli(msg)
     local args = {strsplit(" ", msg)}
     local cmd = table.remove(args, 1)
     if cmd == "" or cmd == "help" then
-        print("RCLI (by Delphyne of Eredar)")
-        print("http://code.google.com/p/rcli/")
-        print("====")
+        print(" RCLI (by Delphyne of Eredar)")
+        print(" http://code.google.com/p/rcli/")
+        print("================================")
+        print("c[onvert]")
+        print("d[emote] <player> [...]")
         print("i[nv[ite]] <player> [...]")
         print("k[ick] <player> [...]")
-        print("c[onvert]")
         print("m[ove] <player> <group>")
-        print("s[wap] <player1> <player2>")
-        print("d[emote] <player> [...]")
         print("p[romote] <player> [leader|looter]")
+        print("s[wap] <player1> <player2>")
     elseif cmd == "promote" then
         Promote(args)
     elseif cmd == "invite" or cmd == "inv" or cmd == "i" then

@@ -10,10 +10,12 @@ local ItemQualityByName = {
     Heirloom = 6
 }
 
--- local ItemQualityByNumber = {}
--- for k,v in pairs(ItemQualityByName) do
---     ItemQualityByNumber[v + 1] = k
--- end
+local RaidRanksByName = {
+    Member = 0,
+    Assistant = 1,
+    Leader = 2
+}
+
 
 local convertOnPartyJoin = false
 local overflowInviteMembers = {}
@@ -22,7 +24,7 @@ local function FindRaidIndex(player)
     for i = 1, GetNumRaidMembers() do
         local name, rank, subgroup = GetRaidRosterInfo(i)
         if name:upper() == player:upper() then
-            return i, subgroup
+            return i, subgroup, rank
         end
     end
 end
@@ -35,6 +37,14 @@ local function Promote(args)
     else
         if role == nil or role == "" then
             PromoteToAssistant(player, false)
+            local _, _, rank = FindRaidIndex(player)
+            -- Raid Assistant doesn't provide any visual feedback
+            -- so provide text feedback
+            if rank == RaidRanksByName["Assistant"] then
+                print(player, "promoted to Raid Assistant.")
+            else
+                print("Promoting", player, "to Raid Assitant failed.")
+            end
         elseif role == "leader" then
             PromoteToLeader(player, false)
         elseif role == "looter" then
@@ -48,9 +58,9 @@ local function Demote(args)
     if #(args) == 0 then
         print("You must specify a player to demote.")
     else
-        for num, player in pairs(args) do
+        for _, player in pairs(args) do
             DemoteAssistant(player, false)
-            local method, partyMaster, raidMaster = GetLootMethod()
+            local method, _, raidMaster = GetLootMethod()
             local index = FindRaidIndex(player)
             if method == "master" and index == raidMaster then
                 SetLootMethod("master", "player")
@@ -74,12 +84,13 @@ end
 local function Kick(args)
     if #(args) == 0 then
         print("You must specify a player to kick.")
-    end
-    for num, player in pairs(args) do
-        if UnitInRaid(player) == nil then
-            print(player, "is not in your raid.")
-        else
-            UninviteUnit(player)
+    else
+        for _, player in pairs(args) do
+            if UnitInRaid(player) == nil then
+                print(player, "is not in your raid.")
+            else
+                UninviteUnit(player)
+            end
         end
     end
 end
@@ -93,7 +104,7 @@ local function Invite(args)
         players = {unpack(args, 1, maxInvite)}
         overflowInviteMembers = {unpack(args, maxInvite + 1)}
     end
-    for num, player in pairs(args) do
+    for _, player in pairs(args) do
         InviteUnit(player)
     end
 end

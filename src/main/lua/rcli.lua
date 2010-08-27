@@ -45,15 +45,16 @@ local function Promote(args)
 end
 
 local function Demote(args)
-    local player = table.remove(args, 1)
-    if player == nil or player == "" then
+    if #(args) == 0 then
         print("You must specify a player to demote.")
     else
-        DemoteAssistant(player, false)
-        local method, partyMaster, raidMaster = GetLootMethod()
-        local index = FindRaidIndex(player)
-        if method == "master" and index == raidMaster then
-            SetLootMethod("master", "player")
+        for num, player in pairs(args) do
+            DemoteAssistant(player, false)
+            local method, partyMaster, raidMaster = GetLootMethod()
+            local index = FindRaidIndex(player)
+            if method == "master" and index == raidMaster then
+                SetLootMethod("master", "player")
+            end
         end
     end
 end

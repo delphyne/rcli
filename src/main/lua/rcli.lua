@@ -71,13 +71,18 @@ local function Convert()
 end
 
 local function Kick(args)
-    local player = table.remove(args, 1)
-    if player == nil or player == "" then
+    if #(args) == 0 then
         print("You must specify a player to kick.")
-    else
-        UninviteUnit(player)
+    end
+    for num, player in pairs(args) do
+        if UnitInRaid(player) == nil then
+            print(player, "is not in your raid.")
+        else
+            UninviteUnit(player)
+        end
     end
 end
+
 
 local function Invite(args)
     local players = args

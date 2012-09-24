@@ -16,12 +16,11 @@ local RaidRanksByName = {
     Leader = 2
 }
 
-
 local convertOnPartyJoin = false
 local overflowInviteMembers = {}
 
 local function FindRaidIndex(player)
-    for i = 1, GetNumRaidMembers() do
+    for i = 1, GetNumGroupMembers() do
         local name, rank, subgroup = GetRaidRosterInfo(i)
         if name:upper() == player:upper() then
             return i, subgroup, rank
@@ -72,7 +71,7 @@ end
 local function Convert()
     if not UnitInParty("player") then
         print("You are not in a party.")
-    elseif IsPartyLeader() ~= 1 then
+    elseif UnitIsGroupLeader("player") then
         print("You are not the party leader.")
     elseif UnitInRaid("player") then
         print("You are already in a raid.")
@@ -95,12 +94,14 @@ local function Kick(args)
     end
 end
 
-
 local function Invite(args)
     local players = args
+    if UnitInParty("player") then
+        ConvertToRaid()
+    end
     if not UnitInRaid("player") then
         convertOnPartyJoin = true
-        local maxInvite = 5 - GetNumPartyMembers()
+        local maxInvite = 5 - GetNumGroupMembers()
         players = {unpack(args, 1, maxInvite)}
         overflowInviteMembers = {unpack(args, maxInvite + 1)}
     end
@@ -141,17 +142,17 @@ end
 local function ParseCli(msg)
     local args = {strsplit(" ", msg)}
     local cmd = table.remove(args, 1)
-    if cmd == "" or cmd == "help" then
+    if cmd == "" or cmd == "help" or cmd == "h" then
         print(" RCLI (by Delphyne of Eredar)")
         print(" http://code.google.com/p/rcli/")
         print("================================")
-        print("c[onvert]")
-        print("d[emote] <player> [...]")
-        print("i[nv[ite]] <player> [...]")
-        print("k[ick] <player> [...]")
-        print("m[ove] <player> <group>")
-        print("p[romote] <player> [leader|looter]")
-        print("s[wap] <player1> <player2>")
+        print(" c[onvert]")
+        print(" d[emote] <player> [...]")
+        print(" i[nv[ite]] <player> [...]")
+        print(" k[ick] <player> [...]")
+        print(" m[ove] <player> <group>")
+        print(" p[romote] <player> [leader|looter]")
+        print(" s[wap] <player1> <player2>")
     elseif cmd == "promote" then
         Promote(args)
     elseif cmd == "invite" or cmd == "inv" or cmd == "i" then
@@ -191,4 +192,4 @@ SlashCmdList["RELOAD"] = function(msg)
 end
 
 RCLI:SetScript("OnEvent", HandlePartyJoin)
-RCLI:RegisterEvent("PARTY_MEMBERS_CHANGED")
+RCLI:RegisterEvent("GROUP_ROSTER_UPDATE")

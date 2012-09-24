@@ -5,7 +5,7 @@
 	
     <groupId>org.dyndns.delphyne</groupId>
     <artifactId>rcli</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 	
     <name>Raid Command Line World of Warcraft Addon</name>
@@ -16,7 +16,7 @@
     </description>
 	
     <build>
-        <finalName>rcli-${pom.version}</finalName>
+        <finalName>rcli-${project.version}</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>

@@ -1,0 +1,1 @@
+Provides a set of quick /rcli commands which allow a raid leader to manager a raid without the need to reach for a mouse.
